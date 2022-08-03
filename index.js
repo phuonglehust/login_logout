@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const authRoute = require("./routes/auth");
+const userRouter = require("./routes/user");
 
 const app = express();
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json()); // sử dụng để data resquest và respond dưới 
 
 // ROUTES
 app.use("/v1/auth",authRoute);
+app.use("/v1/user",userRouter);
 
 app.listen(8000, () =>{
     console.log("Server is running");
@@ -26,4 +28,6 @@ app.listen(8000, () =>{
 // AUTHENTICATION
 
 // AUTHORIZATION , PHAN QUYEN
+
+// JWT : xac thuc nguoi dung
 

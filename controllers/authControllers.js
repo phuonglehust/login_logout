@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const authControllers ={
@@ -22,7 +23,28 @@ const authControllers ={
             res.status(500).json(err);
         }
     },
+    // GENERATE ACCESS TOKEN
+    generateAccessToken : (user) =>{
+        return jwt.sign({
+                id: user.id,
+                admin: user.admin,
+            },
+            process.env.JWT_ACCESS_KEY,
+            {expiresIn: "30s"}
+        );
+    },
 
+    // GENERATE REFRESH TOKEN
+    generateRefreshToken : (user) =>{
+        return jwt.sign({
+                id: user.id,
+                admin: user.admin,
+            },
+            process.env.JWT_REFRESH_KEY,
+            {expiresIn: "365d"}
+        );
+    },
+    // LOGIN
     loginUser : async(req,res) =>{
         try{
             const user = await User.findOne({username : req.body.username});
@@ -37,8 +59,11 @@ const authControllers ={
                 res.status(404).json("wrong password !");
             }
             if(user && validPassword){
-                res.status(200).json(user);
-                console.log(user);
+              const accessToken = authControllers.generateAccessToken(user);
+                const refreshToken =authControllers.generateRefreshToken(user);
+                const {password,...others} = user._doc;
+                res.status(200).json({...others,accessToken,refreshToken});
+                console.log({user,accessToken,refreshToken});
             }
         }catch(err){
             res.status(500).json(err);
